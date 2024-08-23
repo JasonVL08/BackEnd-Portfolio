@@ -1,0 +1,92 @@
+package com.back.rest.port.controller;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.back.rest.port.entity.Contacto;
+
+import com.back.rest.port.service.ContactoService;
+import com.back.rest.port.utils.AppSettings;
+
+@RestController
+@RequestMapping("url/contacto")
+@CrossOrigin(AppSettings.URL_CROSS_ORIGIN)
+public class ContactoController {
+	
+	@Autowired
+	private ContactoService contactoService;
+	
+	@GetMapping("/listarContacto")
+	public ResponseEntity<List<Contacto>> lista(){
+		List<Contacto> lstSalida = contactoService.listaContacto();
+		return ResponseEntity.ok(lstSalida);
+	}
+	
+	
+	@PostMapping("/registraContacto")
+	@ResponseBody
+	public ResponseEntity<?> insertaContacto(@RequestBody Contacto obj){
+		Map<String, Object> salida = new HashMap<>();
+		try {
+			obj.setId(0);
+			Contacto objSalida =  contactoService.insertaActualizaContacto(obj);
+			if (objSalida == null) {
+				salida.put("mensaje", AppSettings.MENSAJE_REG_ERROR);
+			} else {
+				salida.put("mensaje", AppSettings.MENSAJE_REG_EXITOSO);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			salida.put("mensaje", AppSettings.MENSAJE_REG_ERROR);
+		}
+		return ResponseEntity.ok(salida);
+	}
+	
+	@PutMapping("/actualizaContacto")
+	@ResponseBody
+	public ResponseEntity<Map<String, Object>> actualizaContacto(@RequestBody Contacto obj){
+		Map<String, Object> salida = new HashMap<>();
+		try {
+			Contacto objSalida = contactoService.insertaActualizaContacto(obj);
+			if (objSalida == null) {
+				salida.put("mensaje", AppSettings.MENSAJE_ACT_ERROR);
+			} else {
+				salida.put("mensaje", AppSettings.MENSAJE_ACT_EXITOSO + " Contacto de ID ==> " + obj.getId() + "...");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			salida.put("mensaje", AppSettings.MENSAJE_ACT_ERROR);
+		}
+		return ResponseEntity.ok(salida);
+	}
+	
+	@DeleteMapping("/eliminaContacto/{id}")
+	@ResponseBody
+	public ResponseEntity<Map<String, Object>> eliminaContacto(@PathVariable("id") int id) {
+		Map<String, Object> salida = new HashMap<>();
+		try {
+			contactoService.eliminaContacto(id);
+			salida.put("mensaje", AppSettings.MENSAJE_ELI_EXITOSO + " Contacto de ID ==> " + id + "." );
+		} catch (Exception e) {
+			e.printStackTrace();
+			salida.put("mensaje", AppSettings.MENSAJE_ELI_ERROR);
+		}
+		return ResponseEntity.ok(salida);
+	}
+
+
+}
